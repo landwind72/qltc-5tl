@@ -1067,7 +1067,8 @@ function txH(t,mini=false){
     bg=isAdj?'rgba(96,165,250,.15)':isI?'rgba(67,217,143,.15)':'rgba(255,95,109,.15)';
     icon=isAdj?'⚖️':cat.e;sign=isI?'+':'-';subLabel=isAdj?'Điều chỉnh số dư':cat.n;amtLabel=fF(t.amount);
   }
-  return`<div class="tx" onclick="openDet('${t.id}')">
+  const clickFn=isDebt?`openLD('${t.ledgerId}')`:`openDet('${t.id}')`;
+  return`<div class="tx" onclick="${clickFn}">
     <div class="tx-ico" style="background:${bg}">${icon}</div>
     <div class="tx-info"><div class="tx-name">${t.note||(isTfr?subLabel:subLabel)}</div><div class="tx-sub">${subLabel}${w&&!mini&&!isTfr?' · '+w.name:''}</div></div>
     <div class="tx-r"><div class="amt ${cls}">${sign}${amtLabel}</div><div class="dtb">${fD(t.date)}</div></div>
@@ -1446,6 +1447,9 @@ function saveLedger(){
       initTx.note=(l.type==='lend'?'Cho vay: ':'Vay từ: ')+l.contact+(l.title?' ('+l.title+')':'');
       initTx.date=l.date;
     }
+    // Also sync the initial entry inside l.entries
+    const initEntry=l.entries.find(e=>e.type==='initial');
+    if(initEntry)initEntry.date=l.date;
     save();cm('m-ledger');renderLedgers();renderTxList();toast('✅ Đã cập nhật','success');
     editingLedgerId=null;
   }else{
@@ -1582,12 +1586,13 @@ function openLD(id){
         <div style="flex:1;"><div style="font-size:12px;font-weight:700;">${lbl}</div><div style="font-size:10px;color:var(--text2);">${fD(en.date)}${en.note&&en.note!=='Khởi tạo sổ nợ'?' · '+en.note:''}${ew?' · '+ew.icon+ew.name:''}</div></div>
         <div style="text-align:right;">
           <div class="amt ${isOut?'exp':'inc'}" style="font-size:13px;">${isOut?'-':'+'}${fF(en.amount)}</div>
-          ${!l.done&&en.type!=='initial'?`<div onclick="delEntry('${l.id}','${en.id}')" style="font-size:10px;color:var(--red);cursor:pointer;margin-top:2px;">🗑 xóa</div>`:''}
+          ${!l.done&&en.type!=='initial'?`<button onclick="delEntry('${l.id}','${en.id}')" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-top:4px;">🗑 Xóa GD này</button>`:''}
         </div>
       </div>`;
     }).join('')}</div>
   </div>`;
   document.getElementById('ld-del').onclick=()=>delLedger(id);
+  document.getElementById('ld-del').textContent='🗑 Xóa TOÀN BỘ sổ nợ';
   om('m-ld');
 }
 function markDone(id){
@@ -1604,7 +1609,7 @@ function delEntry(lid,eid){
   l.done=remaining(l)<=0;
   // Remove linked transaction
   S.transactions=S.transactions.filter(t=>t.entryId!==eid);
-  save();openLD(lid);renderLedgers();renderWallets();renderHome();
+  save();openLD(lid);renderLedgers();renderWallets();renderHome();renderTxList();
   toast('Đã xóa','success');
 }
 function delLedger(id){
