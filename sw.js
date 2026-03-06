@@ -1,4 +1,4 @@
-const CACHE_NAME = 'qltc-v6.2';
+const CACHE_NAME = 'qltc-v6.9';
 const LOCAL_ASSETS = [
   './index.html',
   './manifest.json',
