@@ -741,7 +741,7 @@ input,select,button,textarea{font-family:'Nunito',sans-serif;}
     <div class="mscr">
       <div class="itabs"><button class="itb a" onclick="setCatTab(this,'expense')">💸 Chi tiêu</button><button class="itb" onclick="setCatTab(this,'income')">💰 Thu nhập</button></div>
       <div id="catmgr-list"></div>
-      <div style="background:var(--surf2);border-radius:12px;padding:12px;margin-top:8px;">
+      <div style="position: sticky; bottom: 0; background:var(--surf2);border-radius:12px;padding:12px;margin-top:8px; z-index: 10;">
         <div style="font-size:11px;font-weight:800;color:var(--text2);margin-bottom:10px;">➕ Thêm danh mục mới</div>
         <div class="fg"><label class="fl">Tên danh mục</label><input class="fi" id="newcat-name" placeholder="VD: Cà phê, Gym..."></div>
         <div class="fg"><label class="fl">Chọn biểu tượng</label><div class="emoji-grid" id="emoji-picker"></div></div>
@@ -2436,7 +2436,19 @@ async function gdriveDownload(fileId, fromDev){
 }
 
 // ═══════════════════ MODAL UTILS ═══════════════════════════
-function om(id){document.getElementById(id).classList.add('on');}
+
+// function om(id){document.getElementById(id).classList.add('on');}
+
+// Thêm một biến để theo dõi z-index cao nhất hiện tại
+let maxZ = 200; 
+
+function om(id) {
+  const el = document.getElementById(id);
+  maxZ++; // Mỗi lần mở modal mới, tăng z-index lên 1 đơn vị
+  el.style.zIndex = maxZ; 
+  el.classList.add('on');
+}
+
 function cm(id){document.getElementById(id).classList.remove('on');}
 function ci(e,id){if(e.target===document.getElementById(id))cm(id);}
 
